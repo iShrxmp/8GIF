@@ -9,7 +9,6 @@ import math
 import sys
 
 def resource_path(relative_path):
-    """PyInstaller ile paketlenmiş kaynakları bulur."""
     try:
         base_path = sys._MEIPASS
     except AttributeError:
