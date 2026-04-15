@@ -93,4 +93,6 @@ Head to the [**Releases**](../../releases/latest) page and download **8GIF.exe**
 
 ## License
 
-MIT — free to use and modify.
+Copyright (c) 2026 iShrxmp. All Rights Reserved.
+
+This software is proprietary. Redistribution, modification, or commercial use is not permitted without explicit written permission from the author.

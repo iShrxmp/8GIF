@@ -18,5 +18,4 @@ __pycache__/
 *.pyo
 
 # Misc
-strip_emoji.py
 *.log
