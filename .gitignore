@@ -1,0 +1,22 @@
+# Build output
+dist/
+dist2/
+dist3/
+dist4/
+dist5/
+release/
+release2/
+release3/
+release4/
+release5/
+build/
+*.spec
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Misc
+strip_emoji.py
+*.log
