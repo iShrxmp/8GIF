@@ -727,8 +727,19 @@ class GifOptimizerApp(ctk.CTk):
         if not self.original_frames:
             messagebox.showwarning("Warning", self.tr("err_nofile"))
             return
-            
-        savepath = filedialog.asksaveasfilename(defaultextension=".gif", title="Save Post-Processed GIF", filetypes=[("GIF", "*.gif")])
+
+        savepath = filedialog.asksaveasfilename(
+            defaultextension=".gif",
+            title="Finalize & Save",
+            filetypes=[
+                ("GIF (animated)",       "*.gif"),
+                ("WebP (animated)",      "*.webp"),
+                ("PNG (first frame)",    "*.png"),
+                ("JPEG (first frame)",   "*.jpg"),
+                ("BMP (first frame)",    "*.bmp"),
+                ("All Files",            "*.*"),
+            ]
+        )
         if not savepath: return
         threading.Thread(target=self._finalize_thread, args=(savepath,), daemon=True).start()
 
@@ -772,13 +783,32 @@ class GifOptimizerApp(ctk.CTk):
                 perc = self.slider_val.get()
                 frames, dur = self.apply_transformations(perc)
 
-            kwa = {'save_all': True, 'loop': self.loop, 'disposal': 2, 'optimize': False}
-            if self.transparency is not None: kwa['transparency'] = self.transparency
-            
-            if len(frames) > 1: 
-                frames[0].save(savepath, format="GIF", append_images=frames[1:], duration=dur, **kwa)
-            else: 
-                frames[0].save(savepath, format="GIF", **kwa)
+            ext = os.path.splitext(savepath)[1].lower()
+
+            if ext in (".gif", ".webp"):
+                # Animated formats
+                fmt = "GIF" if ext == ".gif" else "WEBP"
+                kwa = {'save_all': True, 'loop': self.loop, 'disposal': 2, 'optimize': False}
+                if ext == ".gif" and self.transparency is not None:
+                    kwa['transparency'] = self.transparency
+                if len(frames) > 1:
+                    frames[0].save(savepath, format=fmt, append_images=frames[1:], duration=dur, **kwa)
+                else:
+                    frames[0].save(savepath, format=fmt, **kwa)
+            elif ext in (".jpg", ".jpeg"):
+                # JPEG — no alpha, first frame only
+                frames[0].convert("RGB").save(savepath, format="JPEG", quality=95)
+                if len(frames) > 1:
+                    self.log("[Note] JPEG is static — only the first frame was saved.")
+            elif ext == ".bmp":
+                frames[0].convert("RGB").save(savepath, format="BMP")
+                if len(frames) > 1:
+                    self.log("[Note] BMP is static — only the first frame was saved.")
+            else:
+                # PNG and anything else — first frame, keep RGBA
+                frames[0].convert("RGBA").save(savepath, format="PNG")
+                if len(frames) > 1:
+                    self.log("[Note] PNG is static — only the first frame was saved.")
 
             self.log(self.tr("log_saved") + f"-> {os.path.basename(savepath)}")
             self.after(0, lambda: messagebox.showinfo("Success", self.tr("log_saved")))
